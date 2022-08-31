@@ -1,16 +1,9 @@
 apply from: 'product-config.gradle'
 
-ext {
-    githubEventLoggerPackageUrl = project.findProperty("githubEventLoggerPackageUrl") as String ?: System.getenv("githubEventLoggerPackageUrl")
-    githubPackagesUser = project.findProperty("githubPackagesUser") as String ?: System.getenv("githubPackagesUser")
-    githubPackagesToken = project.findProperty("githubPackagesToken") as String ?: System.getenv("githubPackagesToken")
-}
 
 buildscript {
-
     ext.kotlin_version = '1.6.10'
     ext.dokka_version = '1.6.10'
-
     repositories {
         google()
         jcenter()
@@ -28,16 +21,6 @@ allprojects {
         mavenLocal()
         google()
         mavenCentral()
-        if(githubEventLoggerPackageUrl != null) {
-            maven {
-                name = "GitHubPackages"
-                url = uri(githubEventLoggerPackageUrl)
-                credentials {
-                    username = githubPackagesUser
-                    password = githubPackagesToken
-                }
-            }
-        }
         jcenter()
         maven { url "https://jitpack.io" }
     }

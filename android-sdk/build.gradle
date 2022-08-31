@@ -6,7 +6,6 @@ plugins {
     id("kotlin-parcelize")
     id('com.kezong.fat-aar')
     id('org.jetbrains.dokka')
-    id('maven-publish')
 }
 
 android {
@@ -66,86 +65,3 @@ dependencies {
 
 // Because the components are created only during the afterEvaluate phase, you must
 // configure your publications using the afterEvaluate() lifecycle method.
-afterEvaluate {
-    publishing {
-        publications {
-            // Creates a Maven publication called "release".
-            release(MavenPublication) {
-                from components.release
-
-                artifactId productArtefactId
-                version productVersion
-                groupId productGroupId
-
-                pom {
-                    name = pomName
-                    description = pomDescription
-                    url = githubProjectUrl
-
-                    licenses {
-                        license {
-                            name = 'MIT License'
-                            url = "https://raw.githubusercontent.com/${githubProjectName}/master/LICENSE"
-                        }
-                    }
-                    developers {
-                        developer {
-                            id = "mobile-team-cko"
-                            name = "Checkout Mobile Team"
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-void configureDokkaTaskForDocsExport(DokkaTask dokkaTask, String targetDirName) {
-    def targetDocsDir = file("$rootDir/docs/$targetDirName")
-    dokkaTask.configure {
-        doFirst {
-            delete targetDocsDir
-        }
-        doLast {
-            copy {
-                from outputDirectory
-                into targetDocsDir
-            }
-        }
-    }
-}
-
-task dokkaBuildAndExportDocs(group: "documentation") {
-    dependsOn("dokkaHtml", "dokkaJavadoc")
-
-    tasks.dokkaHtml.finalizedBy {
-        println("Finalize: $name")
-    }
-    configureDokkaTaskForDocsExport(tasks.dokkaHtml, "kotlin")
-    configureDokkaTaskForDocsExport(tasks.dokkaJavadoc, "java")
-}
-
-tasks.withType(DokkaTask.class).configureEach {
-    moduleName.set(docsTitle)
-    moduleVersion.set(productVersion)
-    suppressInheritedMembers.set(true)
-    suppressObviousFunctions.set(true)
-
-    dokkaSourceSets {
-        configureEach {
-            suppress.set(true)
-        }
-
-        named("main") {
-            suppress.set(false)
-            noAndroidSdkLink.set(false)
-
-            displayName.set(docsDisplayName)
-            skipEmptyPackages.set(true)
-            suppress.set(false)
-            reportUndocumented.set(true)
-
-            includes.from("module.md")
-        }
-    }
-}
